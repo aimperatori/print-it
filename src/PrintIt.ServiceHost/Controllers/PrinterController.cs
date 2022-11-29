@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using PrintIt.Core;
 
 namespace PrintIt.ServiceHost.Controllers
@@ -21,7 +21,7 @@ namespace PrintIt.ServiceHost.Controllers
             string[] installedPrinters = _printerService.GetInstalledPrinters();
             return Ok(installedPrinters);
         }
-
+        /*
         [HttpPost]
         [Route("install")]
         public IActionResult InstallPrinter([FromQuery] string printerPath)
@@ -29,5 +29,6 @@ namespace PrintIt.ServiceHost.Controllers
             _printerService.InstallPrinter(printerPath);
             return Ok();
         }
+        */
     }
 }

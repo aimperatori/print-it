@@ -26,7 +26,8 @@ namespace PrintIt.ServiceHost.Controllers
             _pdfPrintService.Print(pdfStream,
                 printerName: request.PrinterPath,
                 pageRange: request.PageRange,
-                numberOfCopies: request.Copies ?? 1);
+                numberOfCopies: request.Copies ?? 1,
+                request.PdfFile.FileName);
             return Ok();
         }
     }
