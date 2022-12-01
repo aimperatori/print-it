@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PrintIt.Core;
+using PrintIt.ServiceHost.Middlewares;
 
 namespace PrintIt.ServiceHost
 {
@@ -19,8 +20,10 @@ namespace PrintIt.ServiceHost
 
         public void Configure(IApplicationBuilder app, IHostEnvironment env)
         {
+            app.UsePrintItAuthentication();
+            app.UseAuthorization();
             app.UseRouting();
-            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });            
         }
     }
 }
