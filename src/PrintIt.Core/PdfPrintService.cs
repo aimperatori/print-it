@@ -21,9 +21,6 @@ namespace PrintIt.Core
 
         public void Print(Stream pdfStream, string printerName, string pageRange = null, int numberOfCopies = 1, string documentName = "document")
         {
-            if (pdfStream == null)
-                throw new ArgumentNullException(nameof(pdfStream));
-
             PdfDocument document = PdfDocument.Open(pdfStream);
 
             _logger.LogInformation($"Printing PDF containing {document.PageCount} page(s) to printer '{printerName}'");
