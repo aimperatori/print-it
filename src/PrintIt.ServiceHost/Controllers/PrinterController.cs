@@ -21,14 +21,13 @@ namespace PrintIt.ServiceHost.Controllers
             string[] installedPrinters = _printerService.GetInstalledPrinters();
             return Ok(installedPrinters);
         }
-        /*
+        
         [HttpPost]
         [Route("install")]
         public IActionResult InstallPrinter([FromQuery] string printerPath)
         {
             _printerService.InstallPrinter(printerPath);
             return Ok();
-        }
-        */
+        }        
     }
 }

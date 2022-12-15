@@ -16,29 +16,43 @@ namespace PrintIt.ServiceHost.Controllers
     public class PrintController : ControllerBase
     {
         private readonly IPdfPrintService _pdfPrintService;
+        private readonly IPrinterService  _printerService;
 
-        public PrintController(IPdfPrintService pdfPrintService)
+        public PrintController(IPdfPrintService pdfPrintService, IPrinterService printerService)
         {
             _pdfPrintService = pdfPrintService;
+            _printerService = printerService;
         }
 
         [HttpPost]
         [Route("from-pdf")]
         public async Task<IActionResult> PrintFromPdf([FromForm] PrintFromTemplateRequest request)
         {
-            await using Stream pdfStream = request.PdfFile.OpenReadStream();
+            try
+            {
+                await using Stream pdfStream = request.PdfFile.OpenReadStream();
 
-            _pdfPrintService.Print(pdfStream,
-                printerName: request.PrinterPath,
-                pageRange: request.PageRange,
-                numberOfCopies: request.Copies ?? 1,
-                request.PdfFile.FileName);
+                if (_printerService.GetInstalledPrinters().Contains(request.PrinterPath) == false)
+                {
+                    _printerService.InstallPrinter(request.PrinterPath);
+                }
 
-            return Ok();
+                _pdfPrintService.Print(pdfStream,
+                    printerName: request.PrinterPath,
+                    pageRange: request.PageRange,
+                    numberOfCopies: request.Copies ?? 1,
+                    request.PdfFile.FileName);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 
-    public sealed class PrintFromTemplateRequest : IValidatableObject
+    public sealed class PrintFromTemplateRequest
     {
         [Required]
         public IFormFile PdfFile { get; set; }
@@ -49,16 +63,5 @@ namespace PrintIt.ServiceHost.Controllers
         public string PageRange { get; set; }
 
         public int? Copies { get; set; }
-
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        {
-            if (PrinterSettings.InstalledPrinters.Cast<string>().Contains(PrinterPath) == false)
-            {
-                yield return new ValidationResult(
-                    $"Printer '{PrinterPath}' not found.",
-                    new[] { nameof(PrinterPath) });
-            }
-
-        }
     }
 }
