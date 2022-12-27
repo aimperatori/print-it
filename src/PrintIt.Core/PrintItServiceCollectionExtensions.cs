@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace PrintIt.Core
@@ -9,8 +9,8 @@ namespace PrintIt.Core
         public static IServiceCollection AddPrintIt(this IServiceCollection services)
         {
             services.AddSingleton<ICommandService, CommandService>();
-            services.AddSingleton<IPdfPrintService, PdfPrintService>();
             services.AddSingleton<IPrinterService, PrinterService>();
+            services.AddSingleton<IPdfPrintService, PdfPrintService>();
             return services;
         }
     }

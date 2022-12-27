@@ -7,7 +7,7 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using PrintIt.Core.Pdfium;
+using Patagames.Pdf.Net;
 
 namespace PrintIt.ServiceHost
 {
@@ -16,7 +16,7 @@ namespace PrintIt.ServiceHost
     {
         public static void Main(string[] args)
         {
-            PdfLibrary.EnsureInitialized();
+            PdfCommon.Initialize();
 
             var isService = !(Debugger.IsAttached || args.Contains("--console"));
 

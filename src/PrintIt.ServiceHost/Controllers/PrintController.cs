@@ -12,7 +12,7 @@ using PrintIt.Core;
 namespace PrintIt.ServiceHost.Controllers
 {
     [ApiController]
-    [Route("print")]
+    [Route("[controller]")]
     public class PrintController : ControllerBase
     {
         private readonly IPdfPrintService _pdfPrintService;
@@ -30,18 +30,22 @@ namespace PrintIt.ServiceHost.Controllers
         {
             try
             {
-                await using Stream pdfStream = request.PdfFile.OpenReadStream();
+                Stream printStream;
+
+                await using Stream pdfStream1 = request.PdfFile1.OpenReadStream();
+
+                await using Stream pdfStream2 = request.PdfFile2?.OpenReadStream();
+
+                printStream = pdfStream1 != null && pdfStream2 != null ? _pdfPrintService.Merge(pdfStream1, pdfStream2) : pdfStream1;
 
                 if (_printerService.GetInstalledPrinters().Contains(request.PrinterPath) == false)
                 {
                     _printerService.InstallPrinter(request.PrinterPath);
                 }
-
-                _pdfPrintService.Print(pdfStream,
+                
+                _pdfPrintService.Print(printStream,
                     printerName: request.PrinterPath,
-                    pageRange: request.PageRange,
-                    numberOfCopies: request.Copies ?? 1,
-                    request.PdfFile.FileName);
+                    numberOfCopies: request.Copies ?? 1);
 
                 return Ok();
             }
@@ -55,13 +59,11 @@ namespace PrintIt.ServiceHost.Controllers
     public sealed class PrintFromTemplateRequest
     {
         [Required]
-        public IFormFile PdfFile { get; set; }
-
+        public IFormFile PdfFile1 { get; set; }
+        public IFormFile PdfFile2 { get; set; }
         [Required]
         public string PrinterPath { get; set; }
-
-        public string PageRange { get; set; }
-
-        public int? Copies { get; set; }
+        [Range(1, 100)]
+        public short? Copies { get; set; }
     }
 }

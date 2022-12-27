@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Microsoft.Extensions.Logging;
 using Moq;
-using PrintIt.Core.Pdfium;
+using Patagames.Pdf.Net;
 
 namespace PrintIt.Core.Tests
 {
@@ -12,7 +12,7 @@ namespace PrintIt.Core.Tests
         public void Print_IntegrationTest()
         {
             // Arrange
-            PdfLibrary.EnsureInitialized();
+            PdfCommon.Initialize();
             var service = new PdfPrintService(Mock.Of<ILogger<PdfPrintService>>());
             using Stream stream = GetEmbeddedResourceStream("Pdfium.dummy.pdf");
 

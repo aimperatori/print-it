@@ -1,11 +1,9 @@
-using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Drawing;
-using System.Drawing.Printing;
 using System.IO;
 using Microsoft.Extensions.Logging;
-using PrintIt.Core.Internal;
-using PrintIt.Core.Pdfium;
+using Patagames.Pdf.Enums;
+using Patagames.Pdf.Net;
+using Patagames.Pdf.Net.Controls.Wpf;
 
 namespace PrintIt.Core
 {
@@ -19,36 +17,47 @@ namespace PrintIt.Core
             _logger = logger;
         }
 
-        public void Print(Stream pdfStream, string printerName, string pageRange = null, int numberOfCopies = 1, string documentName = "document")
+        public Stream Merge(Stream pdfStream1, Stream pdfStrea2)
         {
-            PdfDocument document = PdfDocument.Open(pdfStream);
+            Stream mergedPdf = new MemoryStream();
 
-            _logger.LogInformation($"Printing PDF containing {document.PageCount} page(s) to printer '{printerName}'");
+            _logger.LogInformation($"Merging PDFs");
 
-            using var printDocument = new PrintDocument();
-            printDocument.PrinterSettings.PrinterName = printerName;
-            printDocument.PrinterSettings.Copies = (short)Math.Clamp(numberOfCopies, 1, short.MaxValue);
-            PrintState state = PrintStateFactory.Create(document, pageRange);
-            printDocument.PrintPage += (_, e) => PrintDocumentOnPrintPage(e, state);
-            printDocument.DocumentName = documentName;
-            printDocument.Print();
+            using (var mainDoc = PdfDocument.Load(pdfStream1))
+            {
+                using (var doc = PdfDocument.Load(pdfStrea2))
+                {
+                    // Import all pages from document
+                    mainDoc.Pages.ImportPages(
+                        doc,
+                        string.Format("1-{0}", doc.Pages.Count),
+                        mainDoc.Pages.Count);
+                }
+
+                mainDoc.Save(mergedPdf, SaveFlags.NoIncremental | SaveFlags.ObjectStream);
+            }
+
+            return mergedPdf;
         }
 
-        private void PrintDocumentOnPrintPage(PrintPageEventArgs e, PrintState state)
+        public void Print(Stream pdfStream, string printerName, short numberOfCopies = 1, string documentName = "document")
         {
-            var destinationRect = new RectangleF(
-                x: e.Graphics.VisibleClipBounds.X * e.Graphics.DpiX / 100.0f,
-                y: e.Graphics.VisibleClipBounds.Y * e.Graphics.DpiY / 100.0f,
-                width: e.Graphics.VisibleClipBounds.Width * e.Graphics.DpiX / 100.0f,
-                height: e.Graphics.VisibleClipBounds.Height * e.Graphics.DpiY / 100.0f);
-            using PdfPage page = state.Document.OpenPage(state.CurrentPageIndex);
-            page.RenderTo(e.Graphics, destinationRect);
-            e.HasMorePages = state.AdvanceToNextPage();
+            var document = PdfDocument.Load(pdfStream);
+
+            _logger.LogInformation($"Printing PDF containing {document.Pages.Count} page(s) to printer '{printerName}'");
+
+            var printDoc = new PdfPrintDocument(document);
+            printDoc.PrinterSettings.PrinterName = printerName;
+            printDoc.PrinterSettings.Copies = numberOfCopies;
+            printDoc.DocumentName = documentName;
+            printDoc.Print();
         }
     }
 
     public interface IPdfPrintService
     {
-        void Print(Stream pdfStream, string printerName, string pageRange = null, int numberOfCopies = 1, string documentName = "document");
+        Stream Merge(Stream pdfStream1, Stream pdfStrea2);
+
+        void Print(Stream pdfStream, string printerName, short numberOfCopies = 1, string documentName = "document");
     }
 }

@@ -2,10 +2,11 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <SelfContained>true</SelfContained>
     <RuntimeIdentifier>win7-x64</RuntimeIdentifier>
     <PlatformTarget>x64</PlatformTarget>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,13 +25,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PrintIt.Core\PrintIt.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="..\..\pdfium-binary\pdfium.dll">
-      <Link>pdfium.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
 </Project>
