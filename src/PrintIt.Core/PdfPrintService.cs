@@ -44,7 +44,7 @@ namespace PrintIt.Core
         {
             var document = PdfDocument.Load(pdfStream);
 
-            _logger.LogInformation($"Printing PDF containing {document.Pages.Count} page(s) to printer '{printerName}'");
+            _logger.LogInformation($"Printing PDF containing {document.Pages.Count} page(s) to printer '{printerName} with {numberOfCopies} copies'");
 
             var printDoc = new PdfPrintDocument(document);
             printDoc.PrinterSettings.PrinterName = printerName;
